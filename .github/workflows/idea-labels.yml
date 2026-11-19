@@ -37,10 +37,16 @@ jobs:
               'Другое место': 'рынок: другое место',
             };
 
-            const labels = [goals[answer('Цель')], markets[answer('Рынок')]];
+            // Варианты в форме — с эмодзи и пояснением, ищем в ответе ключевое слово
+            const pick = (map, text) => {
+              const found = text && Object.keys(map).find((key) => text.includes(key));
+              return found ? map[found] : null;
+            };
+
+            const labels = [pick(goals, answer('Цель')), pick(markets, answer('Рынок'))];
 
             const role = answer('Твоё участие');
-            if (role && role !== 'Готов вести проект как владелец') {
+            if (role && !role.includes('Готов вести')) {
               labels.push('нужен владелец');
             }
 
