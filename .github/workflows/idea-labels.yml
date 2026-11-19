@@ -1,0 +1,57 @@
+# Ставит метки цели, рынка и «нужен владелец» по ответам в форме новой идеи.
+# Метку «стадия: идея» ставит сама форма (.github/ISSUE_TEMPLATE/idea.yml).
+
+name: Метки идеи
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v8
+        with:
+          script: |
+            const body = context.payload.issue.body || '';
+
+            // Форма кладёт ответ под заголовок «### <вопрос>» через пустую строку
+            const answer = (question) => {
+              const match = body.match(new RegExp(`^### ${question}\\s*\\n+(.+)$`, 'm'));
+              return match ? match[1].trim() : null;
+            };
+
+            const goals = {
+              'Заработать': 'цель: заработать',
+              'Польза': 'цель: польза',
+              'Эксперимент': 'цель: эксперимент',
+            };
+            const markets = {
+              'Батуми': 'рынок: Батуми',
+              'Вайб-клуб': 'рынок: вайб-клуб',
+              'Любой': 'рынок: любой',
+            };
+
+            const labels = [goals[answer('Цель')], markets[answer('Рынок')]];
+
+            const role = answer('Твоё участие');
+            if (role && role !== 'Готов вести проект как владелец') {
+              labels.push('нужен владелец');
+            }
+
+            const toAdd = labels.filter(Boolean);
+            if (toAdd.length === 0) {
+              core.info('Ответов формы не нашёл — issue создан не по шаблону идеи');
+              return;
+            }
+
+            await github.rest.issues.addLabels({
+              ...context.repo,
+              issue_number: context.issue.number,
+              labels: toAdd,
+            });
+            core.info(`Поставил метки: ${toAdd.join(', ')}`);

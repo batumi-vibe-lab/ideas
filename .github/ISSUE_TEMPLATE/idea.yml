@@ -1,0 +1,91 @@
+name: 💡 Новая идея
+description: Предложить идею проекта для клуба
+labels: ["стадия: идея"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Название идеи впиши в заголовок issue выше — коротко, чтобы было понятно из списка.
+        Пиши тезисно: идею можно дополнить потом в комментариях.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Проблема и для кого
+      description: Кому и что сейчас неудобно, сложно или дорого
+      placeholder: Экспаты в Батуми не могут быстро найти сантехника, который говорит по-русски или по-английски
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Как решаем
+      description: Что делаем — сайт, бот, сервис, приложение — и как это работает
+      placeholder: Каталог мастеров с отзывами и Telegram-бот для заявок
+    validations:
+      required: true
+
+  # Ответы на три вопроса ниже превращаются в метки — .github/workflows/idea-labels.yml.
+  # Меняешь варианты — поменяй и соответствие в workflow.
+  - type: dropdown
+    id: goal
+    attributes:
+      label: Цель
+      description: Заработать — продукт ради денег. Польза — для города, сообщества, open source без расчёта на доход. Эксперимент — научиться, попробовать технологию
+      options:
+        - Заработать
+        - Польза
+        - Эксперимент
+    validations:
+      required: true
+
+  - type: dropdown
+    id: market
+    attributes:
+      label: Рынок
+      description: Батуми — экспаты, туристы, местный бизнес, город. Вайб-клуб — инструменты для участников и клуба. Любой — продукт не привязан к городу
+      options:
+        - Батуми
+        - Вайб-клуб
+        - Любой
+    validations:
+      required: true
+
+  - type: dropdown
+    id: role
+    attributes:
+      label: Твоё участие
+      options:
+        - Готов вести проект как владелец
+        - Готов участвовать в команде
+        - Только предлагаю идею
+    validations:
+      required: true
+
+  - type: textarea
+    id: money
+    attributes:
+      label: Кто будет платить
+      description: Для цели «Заработать» — как идея принесёт деньги. Не знаешь — так и напиши
+      placeholder: Мастера платят за размещение и приоритет в выдаче
+
+  - type: textarea
+    id: team
+    attributes:
+      label: Кто уже в команде
+      description: Ники на GitHub через @ или имена
+      placeholder: Пока никого
+
+  - type: textarea
+    id: help
+    attributes:
+      label: Какая помощь нужна
+      description: Навыки, контакты, данные, деньги
+      placeholder: Бэкенд, контакты с мастерами, проверка спроса
+
+  - type: textarea
+    id: links
+    attributes:
+      label: Ссылки и ресёрч
+      description: Конкуренты, исследования, обсуждения в чате. Файлы можно перетащить прямо сюда

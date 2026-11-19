@@ -1,0 +1,69 @@
+# Создаёт и обновляет метки репозитория. Запуск: Actions → «Настроить метки» → Run workflow.
+# Запускать повторно безопасно: существующие метки обновятся, новые создадутся.
+#
+# Названия меток цели и рынка используются в idea-labels.yml, стадии — в ISSUE_TEMPLATE/idea.yml.
+# Переименовываешь здесь — переименуй и там.
+
+name: Настроить метки
+
+on:
+  workflow_dispatch:
+    inputs:
+      remove_defaults:
+        description: Удалить стандартные метки GitHub (bug, enhancement и другие)
+        type: boolean
+        default: false
+
+permissions:
+  issues: write
+
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v8
+        env:
+          REMOVE_DEFAULTS: ${{ inputs.remove_defaults }}
+        with:
+          script: |
+            const labels = [
+              // Стадия — у открытой идеи ровно одна
+              ['стадия: идея', 'fbca04', 'Есть описание. Это и есть бэклог'],
+              ['стадия: проверка', 'd93f0b', 'Кто-то проверяет спрос: ресёрч, интервью, лендинг, реклама'],
+              ['стадия: разработка', '1d76db', 'Есть репозиторий proj-*, пишут код'],
+              // Цель — одна
+              ['цель: заработать', '0e8a16', 'Продукт ради денег'],
+              ['цель: польза', '5319e7', 'Для города, сообщества, open source без расчёта на доход'],
+              ['цель: эксперимент', 'c5def5', 'Научиться, попробовать технологию'],
+              // Рынок — один
+              ['рынок: Батуми', '006b75', 'Экспаты, туристы, местный бизнес, город'],
+              ['рынок: вайб-клуб', 'e99695', 'Инструменты для участников и клуба'],
+              ['рынок: любой', 'bfd4f2', 'Продукт не привязан к городу'],
+              // Кто нужен — флаги, можно оба или ни одного
+              ['нужен владелец', 'b60205', 'Вести идею некому — возьми её'],
+              ['нужны люди', 'fef2c0', 'Владелец есть, собирает команду'],
+            ];
+
+            for (const [name, color, description] of labels) {
+              try {
+                await github.rest.issues.updateLabel({ ...context.repo, name, color, description });
+                core.info(`обновлена: ${name}`);
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                await github.rest.issues.createLabel({ ...context.repo, name, color, description });
+                core.info(`создана: ${name}`);
+              }
+            }
+
+            if (process.env.REMOVE_DEFAULTS === 'true') {
+              const defaults = ['bug', 'documentation', 'duplicate', 'enhancement', 'good first issue',
+                                'help wanted', 'invalid', 'question', 'wontfix'];
+              for (const name of defaults) {
+                try {
+                  await github.rest.issues.deleteLabel({ ...context.repo, name });
+                  core.info(`удалена: ${name}`);
+                } catch (error) {
+                  if (error.status !== 404) throw error;
+                }
+              }
+            }
